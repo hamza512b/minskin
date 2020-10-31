@@ -13,7 +13,7 @@ const backgroundColor = 0xF2F2F2;
 const lightColor = 0xFFFFFF;
 const primaryColor = 0x3399CC;
 const groundColor = 0xE5EAEF;
-const fileLocation = "/skin.glb";
+const fileLocation = "./skin.glb";
 
 // Nodes
 const canvas = document.querySelector("canvas");
@@ -118,7 +118,7 @@ const getCursorPosition = ev => ({
 const rotJoint = pos => {
     // Left Right
     head.rotation.y = limitWithinRange((Math.PI * 2) + (Math.PI / 2 * pos.x), 6, 6.5);
-    
+
     // Top Bottom
     head.rotation.x = limitWithinRange((Math.PI * 2) - (Math.PI / 2 * pos.y), 6.1, 6.4);
 };
