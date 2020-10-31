@@ -8,7 +8,7 @@ import "./style.scss"
 
 // Variables
 const allowHellpers = false;
-const FOV = 50;
+const FOV = 60;
 const backgroundColor = 0xF2F2F2;
 const lightColor = 0xFFFFFF;
 const primaryColor = 0x3399CC;
@@ -80,13 +80,14 @@ if (allowHellpers) {
 
 // Content
 const loader = new GLTFLoader();
-let model;
+let head;
 loader.load(fileLocation, res => {
-    model = res.scene;
+    const model = res.scene;
     model.traverse((obj) => {
         obj.castShadow = true;
+        if (obj.name === "Head") head = obj;
     })
-
+    model.position.y = -.5
     scene.add(model);
     // Disable loader
     spinner.remove();
@@ -99,35 +100,52 @@ const planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1000);
 const planeMaterial = new THREE.MeshPhongMaterial({ color: groundColor });
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.rotation.x = - Math.PI / 2;
-plane.position.y = -1;
+plane.position.y = -1.5;
 plane.receiveShadow = true;
-
-const d = 5;
-dl.shadow.camera.left = - d;
-dl.shadow.camera.right = d;
-dl.shadow.camera.top = d;
-dl.shadow.camera.bottom = - d;
-
 scene.add(plane);
 
+// Fellow cursor 
+window.addEventListener("mousemove", ev => {
+    const pos = getCursorPosition(ev);
+    rotJoint(pos)
+    renderer.render(scene, camera);
+});
+const getCursorPosition = ev => ({
+    x: (ev.clientX / window.innerWidth) * 2 - 1,
+    y: - (ev.clientY / window.innerHeight) * 2 + 1 
+});
+
+const rotJoint = pos => {
+    // Left Right
+    head.rotation.y = limitWithinRange((Math.PI * 2) + (Math.PI / 2 * pos.x), 6, 6.5);
+    
+    // Top Bottom
+    head.rotation.x = limitWithinRange((Math.PI * 2) - (Math.PI / 2 * pos.y), 6.1, 6.4);
+};
+
+const limitWithinRange = (num, min, max) => Math.min(Math.max(num, min), max);
+
+// Resizing
+window.addEventListener("resize", () => {
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.render(scene, camera);
+});
 
 // Display
-renderer.render(scene, camera);
-
 let k = .05;
-const animate = function () {
+const animate = () => {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
-
     camera.updateProjectionMatrix();
-    requestAnimationFrame(animate);
+
+    const anime = requestAnimationFrame(animate);
     renderer.render(scene, camera);
 
-    if (camera.position.z > 3.5) {
+    if (camera.position.z > 4 || spotLight.position.z > 4) {
         camera.position.z -= k;
-        k += 0.01;
-    }
-    if (spotLight.position.z > 3.5) {
         spotLight.position.z -= k;
         k += 0.01;
+    } else {
+        cancelAnimationFrame(anime);
     }
 };
