@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 // // TODO: remvove in production
-// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import "./style.scss"
 
@@ -36,9 +36,8 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
 renderer.setSize(window.innerWidth, window.innerHeight, false);
 
-// // Orbit control 
-// const controls = new OrbitControls(camera, canvas);
-// controls.update();
+// Orbit control 
+const controls = new OrbitControls(camera, canvas);
 
 // Ambient Light
 const ambientLight = new THREE.AmbientLight(0x404040);
@@ -112,7 +111,7 @@ window.addEventListener("mousemove", ev => {
 });
 const getCursorPosition = ev => ({
     x: (ev.clientX / window.innerWidth) * 2 - 1,
-    y: - (ev.clientY / window.innerHeight) * 2 + 1 
+    y: - (ev.clientY / window.innerHeight) * 2 + 1
 });
 
 const rotJoint = pos => {
@@ -133,19 +132,29 @@ window.addEventListener("resize", () => {
 });
 
 // Display
-let k = .05;
+let isOrbitControlsActivited = false;
 const animate = () => {
+    if (!isOrbitControlsActivited) zoomInInitally();
+    
+
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
-
-    const anime = requestAnimationFrame(animate);
+    
+    requestAnimationFrame(animate);
     renderer.render(scene, camera);
+};
 
-    if (camera.position.z > 4 || spotLight.position.z > 4) {
+
+// Start animation
+let k = .05;
+function zoomInInitally() {
+    if (!isOrbitControlsActivited && camera.position.z > 4 || spotLight.position.z > 4) {
         camera.position.z -= k;
         spotLight.position.z -= k;
         k += 0.01;
     } else {
-        cancelAnimationFrame(anime);
+        isOrbitControlsActivited = true;
+        controls.update();
+
     }
-};
+}
