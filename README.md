@@ -1,12 +1,17 @@
-# minskin
-3d Minecraft skin which looks always at the cursor. Done using three js. 
+# Minskin
 
-This website could be easily used as skin testers. 
+Minecraft skin which always looks at the cursor, the skin can be replaced with a
+skin of your own, but it has to be version 1.8. Meaning it has to 64px in width
+and height.
+
+This also does not have support for layered skins too. So, contribution is
+appreciated.
 
 # Demo
-[https://hamzakhuswan.github.io/minskin/](https://hamzakhuswan.github.io/minskin/)
-  
+Demo video
 
-![Demo Image](./screenshots/minskin.gif "Demo Image")
+[![Minskin demo](https://img.youtube.com/vi/zp3loLMSMyU/0.jpg)](https://www.youtube.com/watch?v=zp3loLMSMyU "Minskin demo")
 
-This is how it looks like, but the color is dimmed out here
+Or
+
+Try it yourself in this Github pages website: [https://hamzakhuswan.github.io/minskin](https://hamzakhuswan.github.io/minskin)
