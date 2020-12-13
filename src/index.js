@@ -5,7 +5,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import "./style.scss"
-import { Mesh } from "three";
 
 // Constetnts
 const allowHellpers = false;
@@ -94,9 +93,14 @@ const updateSkinMap = url => {
     });
 }
 
-setTimeout(() => {
-    updateSkinMap("./myskin.png");
-}, 1000)
+document.getElementById("userImage").addEventListener("change", (e)=>{
+    const image = e.target.files[0];
+    
+    const url = URL.createObjectURL( image );
+    console.log(url);
+    updateSkinMap(url);
+})
+
 
 let head, skin;
 const loader = new GLTFLoader();
@@ -105,7 +109,7 @@ loader.load(fileLocation, gltf => {
 
     skin.traverse(obj => {
         obj.castShadow = true;
-        if (obj.name === "Head") head = obj;
+        if (obj.name === "head") head = obj;
     })
     skin.position.y = -.5
 
@@ -115,7 +119,6 @@ loader.load(fileLocation, gltf => {
     spinner.remove();
     animate();
 }, undefined, (error) => console.log(error));
-
 
 // Ground
 const planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1000);
@@ -143,10 +146,10 @@ const getCursorPosition = ev => ({
 
 const rotJoint = pos => {
     // Left Right
-    head.rotation.y = limitWithinRange((Math.PI * 2) + (Math.PI / 2 * pos.x), 6, 6.5);
+    head.rotation.y = limitWithinRange((Math.PI * 2) + (Math.PI / 2 * -pos.x), 6, 6.5) + Math.PI * 2;
 
     // Top Bottom
-    head.rotation.x = limitWithinRange((Math.PI * 2) - (Math.PI / 2 * pos.y), 6.1, 6.4);
+    head.rotation.x = limitWithinRange((Math.PI * 2) - (Math.PI / 2 * pos.y), 6.1, 6.4)+ Math.PI;
 };
 
 const limitWithinRange = (num, min, max) => Math.min(Math.max(num, min), max);
