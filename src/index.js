@@ -1,20 +1,10 @@
 import * as THREE from "three";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-
-// // TODO: remvove in production
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-
 import "./style.scss"
 
-// Constetnts
-const allowHellpers = false;
-const FOV = 60;
-const backgroundColor = 0xF2F2F2;
-const lightColor = 0xFFFFFF;
-const primaryColor = 0x3399CC;
-const groundColor = 0xE5EAEF;
-const fileLocation = "./skin.glb";
-const angleLimit = 0.8;
+// Configuration
+import config from "../config.js"
 
 // Nodes
 const canvas = document.querySelector("canvas");
@@ -22,12 +12,12 @@ const spinner = document.querySelector("div.spinner");
 
 // Scene Setup
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(backgroundColor);
-scene.fog = new THREE.Fog(backgroundColor, 1, 40);
+scene.background = new THREE.Color(config.backgroundColor);
+scene.fog = new THREE.Fog(config.backgroundColor, 1, 40);
 
 
 // Camera Setup
-const camera = new THREE.PerspectiveCamera(FOV, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(config.FOV, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 15;
 camera.lookAt(0, 0, 0)
 
@@ -41,11 +31,11 @@ renderer.setSize(window.innerWidth, window.innerHeight, false);
 const controls = new OrbitControls(camera, canvas);
 
 // Ambient Light
-const ambientLight = new THREE.AmbientLight(0x404040);
+const ambientLight = new THREE.AmbientLight(0x404040, config.ambientLightStrength);
 scene.add(ambientLight);
 
 // Direactional Light
-const dl = new THREE.DirectionalLight(lightColor, 1);
+const dl = new THREE.DirectionalLight(config.lightColor, config.dirLightStrength);
 dl.castShadow = true;
 dl.shadow.camera.near = 0.1;
 dl.shadow.camera.far = 1500;
@@ -54,16 +44,15 @@ dl.lookAt(0, 0, 0);
 dl.shadow.mapSize = new THREE.Vector2(1024, 1024);
 scene.add(dl);
 
-if (allowHellpers) {
-    const helper = new THREE.DirectionalLightHelper(dl, 5);
-    scene.add(helper);
+if (config.allowHellpers) {
+    const dirLightHelper = new THREE.DirectionalLightHelper(dl, 5);
+    scene.add(dirLightHelper);
 }
 
 // Hemisphere Light
-const hemLight = new THREE.HemisphereLight(primaryColor, 0x44445b, .1);
-const hemLightHelper = new THREE.HemisphereLightHelper(hemLight, 3);
-
-if (allowHellpers) {
+const hemLight = new THREE.HemisphereLight(config.primaryColor, 0x44445b, .1);
+if (config.allowHellpers) {
+    const hemLightHelper = new THREE.HemisphereLightHelper(hemLight, 3);
     scene.add(hemLight);
     scene.add(hemLightHelper);
 }
@@ -73,7 +62,7 @@ const spotLight = new THREE.SpotLight(0xffffff, 0.6);
 spotLight.position.set(0, 0, 16);
 scene.add(spotLight);
 
-if (allowHellpers) {
+if (config.allowHellpers) {
     const spotLightHelper = new THREE.SpotLightHelper(spotLight);
     scene.add(spotLightHelper);
 }
@@ -93,18 +82,10 @@ const updateSkinMap = url => {
     });
 }
 
-document.getElementById("userImage").addEventListener("change", (e)=>{
-    const image = e.target.files[0];
-    
-    const url = URL.createObjectURL( image );
-    console.log(url);
-    updateSkinMap(url);
-})
-
 
 let head, skin;
 const loader = new GLTFLoader();
-loader.load(fileLocation, gltf => {
+loader.load(config.skinLocation, gltf => {
     skin = gltf.scene;
 
     skin.traverse(obj => {
@@ -115,6 +96,25 @@ loader.load(fileLocation, gltf => {
 
     scene.add(skin);
 
+    // Event listners
+    document.getElementById("userImage").addEventListener("change", ev => {
+        const image = ev.target.files[0];
+        const url = URL.createObjectURL(image);
+        updateSkinMap(url);
+    });
+
+    window.addEventListener("mousemove", ev => {
+        // Angle of the camera
+        const angle = Math.abs(controls.getAzimuthalAngle());
+        if (angle > config.joinLimit) return
+
+        const pos = getCursorPosition(ev);
+        rotJoint(pos)
+        renderer.render(scene, camera);
+    });
+
+    if (config.testSkin) updateSkinMap(config.testSkinURL)
+
     // Disable loader
     spinner.remove();
     animate();
@@ -122,23 +122,14 @@ loader.load(fileLocation, gltf => {
 
 // Ground
 const planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1000);
-const planeMaterial = new THREE.MeshPhongMaterial({ color: groundColor });
+const planeMaterial = new THREE.MeshPhongMaterial({ color: config.groundColor });
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.rotation.x = - Math.PI / 2;
 plane.position.y = -1.5;
 plane.receiveShadow = true;
 scene.add(plane);
 
-// Fellow cursor 
-window.addEventListener("mousemove", ev => {
-    // Angle of the camera
-    const angle = Math.abs(controls.getAzimuthalAngle());
-    if (angle > angleLimit) return
-
-    const pos = getCursorPosition(ev);
-    rotJoint(pos)
-    renderer.render(scene, camera);
-});
+// Fellow cursor  stuff
 const getCursorPosition = ev => ({
     x: (ev.clientX / window.innerWidth) * 2 - 1,
     y: - (ev.clientY / window.innerHeight) * 2 + 1
@@ -149,7 +140,7 @@ const rotJoint = pos => {
     head.rotation.y = limitWithinRange((Math.PI * 2) + (Math.PI / 2 * -pos.x), 6, 6.5) + Math.PI * 2;
 
     // Top Bottom
-    head.rotation.x = limitWithinRange((Math.PI * 2) - (Math.PI / 2 * pos.y), 6.1, 6.4)+ Math.PI;
+    head.rotation.x = limitWithinRange((Math.PI * 2) - (Math.PI / 2 * pos.y), 6.1, 6.4) + Math.PI;
 };
 
 const limitWithinRange = (num, min, max) => Math.min(Math.max(num, min), max);
