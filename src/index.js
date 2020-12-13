@@ -12,12 +12,12 @@ const spinner = document.querySelector("div.spinner");
 
 // Scene Setup
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(config.backgroundColor);
-scene.fog = new THREE.Fog(config.backgroundColor, 1, 40);
+scene.background = new THREE.Color(config.backgroundColor || 0xF2F2F2);
+scene.fog = new THREE.Fog(config.backgroundColor || 0xF2F2F2, 1, 40);
 
 
 // Camera Setup
-const camera = new THREE.PerspectiveCamera(config.FOV, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(config.FOV || 60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.z = 15;
 camera.lookAt(0, 0, 0)
 
@@ -31,11 +31,11 @@ renderer.setSize(window.innerWidth, window.innerHeight, false);
 const controls = new OrbitControls(camera, canvas);
 
 // Ambient Light
-const ambientLight = new THREE.AmbientLight(0x404040, config.ambientLightStrength);
+const ambientLight = new THREE.AmbientLight(0x404040, config.ambientLightStrength || 2.5);
 scene.add(ambientLight);
 
 // Direactional Light
-const dl = new THREE.DirectionalLight(config.lightColor, config.dirLightStrength);
+const dl = new THREE.DirectionalLight(config.dirLightColor || 0xFFFFFF, config.dirLightStrength || .5);
 dl.castShadow = true;
 dl.shadow.camera.near = 0.1;
 dl.shadow.camera.far = 1500;
@@ -44,25 +44,25 @@ dl.lookAt(0, 0, 0);
 dl.shadow.mapSize = new THREE.Vector2(1024, 1024);
 scene.add(dl);
 
-if (config.allowHellpers) {
+if (config.allowLightHellpers || false) {
     const dirLightHelper = new THREE.DirectionalLightHelper(dl, 5);
     scene.add(dirLightHelper);
 }
 
 // Hemisphere Light
-const hemLight = new THREE.HemisphereLight(config.primaryColor, 0x44445b, .1);
-if (config.allowHellpers) {
+const hemLight = new THREE.HemisphereLight(config.hemLighColor || 0x3399CC, 0x44445b, config.hemLightStrength || .1);
+if (config.allowLightHellpers || false) {
     const hemLightHelper = new THREE.HemisphereLightHelper(hemLight, 3);
-    scene.add(hemLight);
     scene.add(hemLightHelper);
 }
+scene.add(hemLight);
 
 // Spot Light
-const spotLight = new THREE.SpotLight(0xffffff, 0.6);
+const spotLight = new THREE.SpotLight(0xffffff, config.spotLightStrength || 0.6);
 spotLight.position.set(0, 0, 16);
 scene.add(spotLight);
 
-if (config.allowHellpers) {
+if (config.allowLightHellpers || false) {
     const spotLightHelper = new THREE.SpotLightHelper(spotLight);
     scene.add(spotLightHelper);
 }
@@ -85,7 +85,7 @@ const updateSkinMap = url => {
 
 let head, skin;
 const loader = new GLTFLoader();
-loader.load(config.skinLocation, gltf => {
+loader.load(config.skinLocation || "./skin.glb", gltf => {
     skin = gltf.scene;
 
     skin.traverse(obj => {
@@ -106,14 +106,14 @@ loader.load(config.skinLocation, gltf => {
     window.addEventListener("mousemove", ev => {
         // Angle of the camera
         const angle = Math.abs(controls.getAzimuthalAngle());
-        if (angle > config.joinLimit) return
+        if (angle > (config.joinLimit || 0.8)) return
 
         const pos = getCursorPosition(ev);
         rotJoint(pos)
         renderer.render(scene, camera);
     });
 
-    if (config.testSkin) updateSkinMap(config.testSkinURL)
+    if (config.testSkin || false) updateSkinMap(config.testSkinURL)
 
     // Disable loader
     spinner.remove();
@@ -122,7 +122,7 @@ loader.load(config.skinLocation, gltf => {
 
 // Ground
 const planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1000);
-const planeMaterial = new THREE.MeshPhongMaterial({ color: config.groundColor });
+const planeMaterial = new THREE.MeshPhongMaterial({ color: config.groundColor || 0xE5EAEF });
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 plane.rotation.x = - Math.PI / 2;
 plane.position.y = -1.5;

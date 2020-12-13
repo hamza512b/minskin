@@ -84,7 +84,8 @@ module.exports = env => {
                 server: {
                     baseDir: [path.resolve(__dirname, './dist')],
                     open: true
-                }
+                },
+                notify: false
             }),
             new CleanWebpackPlugin({
                 cleanStaleWebpackAssets: false
