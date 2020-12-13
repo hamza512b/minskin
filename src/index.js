@@ -5,8 +5,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import "./style.scss"
+import { Mesh } from "three";
 
-// Variables
+// Constetnts
 const allowHellpers = false;
 const FOV = 60;
 const backgroundColor = 0xF2F2F2;
@@ -14,6 +15,7 @@ const lightColor = 0xFFFFFF;
 const primaryColor = 0x3399CC;
 const groundColor = 0xE5EAEF;
 const fileLocation = "./skin.glb";
+const angleLimit = 0.8;
 
 // Nodes
 const canvas = document.querySelector("canvas");
@@ -77,17 +79,38 @@ if (allowHellpers) {
     scene.add(spotLightHelper);
 }
 
-// Content
+
+// Object
+const updateSkinMap = url => {
+    const textureLoader = new THREE.TextureLoader();
+    textureLoader.load(url, tex => {
+        tex.magFilter = THREE.NearestFilter;
+        tex.minFilter = THREE.LinearMipMapLinearFilter;
+        tex.flipY = false;
+
+        if (tex.image.width === 64 && tex.image.height === 64) skin.traverse(obj => {
+            if (obj.isMesh) obj.material.map = tex;
+        })
+    });
+}
+
+setTimeout(() => {
+    updateSkinMap("./myskin.png");
+}, 1000)
+
+let head, skin;
 const loader = new GLTFLoader();
-let head;
-loader.load(fileLocation, res => {
-    const model = res.scene;
-    model.traverse((obj) => {
+loader.load(fileLocation, gltf => {
+    skin = gltf.scene;
+
+    skin.traverse(obj => {
         obj.castShadow = true;
         if (obj.name === "Head") head = obj;
     })
-    model.position.y = -.5
-    scene.add(model);
+    skin.position.y = -.5
+
+    scene.add(skin);
+
     // Disable loader
     spinner.remove();
     animate();
@@ -105,6 +128,10 @@ scene.add(plane);
 
 // Fellow cursor 
 window.addEventListener("mousemove", ev => {
+    // Angle of the camera
+    const angle = Math.abs(controls.getAzimuthalAngle());
+    if (angle > angleLimit) return
+
     const pos = getCursorPosition(ev);
     rotJoint(pos)
     renderer.render(scene, camera);
@@ -135,11 +162,11 @@ window.addEventListener("resize", () => {
 let isOrbitControlsActivited = false;
 const animate = () => {
     if (!isOrbitControlsActivited) zoomInInitally();
-    
+
 
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
-    
+
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 };
@@ -154,7 +181,8 @@ function zoomInInitally() {
         k += 0.01;
     } else {
         isOrbitControlsActivited = true;
+        controls.enableZoom = false;
+        controls.ena = false;
         controls.update();
-
     }
 }
