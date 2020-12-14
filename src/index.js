@@ -71,6 +71,10 @@ async function main() {
 const orbit = new OrbitControls(camera, canvas);
 let isOrbitControlsActivited = false, k = .05;
 orbit.enabled = false;
+orbit.enablePan = false;
+orbit.maxDistance = 10;
+orbit.minDistance = 1;
+orbit.maxPolarAngle = 1.9;
 // Start animation
 const animate = () => {
     if (!isOrbitControlsActivited) {
