@@ -8,8 +8,8 @@ export default {
     dirLightColor: 0xFFFFFF,
     hemLighColor: 0x3399CC,
     groundColor: 0xE5EAEF,
-    ambientLightStrength: 2.5,
+    ambientLightStrength: 3,
     dirLightStrength: 0.5,
-    hemLightStrength: 0.01,
-    spotLightStrength: 1
+    hemLightStrength: .2,
+    spotLightStrength: .2
 }

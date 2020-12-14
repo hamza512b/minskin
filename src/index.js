@@ -1,162 +1,87 @@
-import * as THREE from "three";
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
+// Style
 import "./style.scss"
 
-// Configuration
-import config from "../config.js"
+// Main
+import scene from "./main/scene";
+import renderer from "./main/renderer"
+import camera from "./main/camera"
+import light from "./main/light";
+
+// Meshes
+import ground from "./mesh/ground"
+import loadSkin from "./mesh/skin"
+import updateTexture from './api/updateTexture';
+import { getCursorPosition, rotJoint } from './api/rotateHead';
+import config from '../config';
 
 // Nodes
-const canvas = document.querySelector("canvas");
 const spinner = document.querySelector("div.spinner");
+const canvas = document.querySelector("canvas");
 
-// Scene Setup
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(config.backgroundColor || 0xF2F2F2);
-scene.fog = new THREE.Fog(config.backgroundColor || 0xF2F2F2, 1, 40);
+// Main 
+async function main() {
+    try {
+        const { skin, head } = (await loadSkin("/skin.glb"));
 
+        // Add Stuff
+        scene.add(light);
+        scene.add(ground);
+        scene.add(skin);
 
-// Camera Setup
-const camera = new THREE.PerspectiveCamera(config.FOV || 60, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 15;
-camera.lookAt(0, 0, 0)
-
-// Renderer Setup
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.shadowMap.enabled = true;
-renderer.setSize(window.innerWidth, window.innerHeight, false);
-
-// Orbit control 
-const controls = new OrbitControls(camera, canvas);
-
-// Ambient Light
-const ambientLight = new THREE.AmbientLight(0x404040, config.ambientLightStrength || 2.5);
-scene.add(ambientLight);
-
-// Direactional Light
-const dl = new THREE.DirectionalLight(config.dirLightColor || 0xFFFFFF, config.dirLightStrength || .5);
-dl.castShadow = true;
-dl.shadow.camera.near = 0.1;
-dl.shadow.camera.far = 1500;
-dl.position.set(4, 5, 4);
-dl.lookAt(0, 0, 0);
-dl.shadow.mapSize = new THREE.Vector2(1024, 1024);
-scene.add(dl);
-
-if (config.allowLightHellpers || false) {
-    const dirLightHelper = new THREE.DirectionalLightHelper(dl, 5);
-    scene.add(dirLightHelper);
-}
-
-// Hemisphere Light
-const hemLight = new THREE.HemisphereLight(config.hemLighColor || 0x3399CC, 0x44445b, config.hemLightStrength || .1);
-if (config.allowLightHellpers || false) {
-    const hemLightHelper = new THREE.HemisphereLightHelper(hemLight, 3);
-    scene.add(hemLightHelper);
-}
-scene.add(hemLight);
-
-// Spot Light
-const spotLight = new THREE.SpotLight(0xffffff, config.spotLightStrength || 0.6);
-spotLight.position.set(0, 0, 16);
-scene.add(spotLight);
-
-if (config.allowLightHellpers || false) {
-    const spotLightHelper = new THREE.SpotLightHelper(spotLight);
-    scene.add(spotLightHelper);
-}
-
-
-// Object
-const updateSkinMap = url => {
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(url, tex => {
-        tex.magFilter = THREE.NearestFilter;
-        tex.minFilter = THREE.LinearMipMapLinearFilter;
-        tex.flipY = false;
-
-        if (tex.image.width === 64 && tex.image.height === 64) skin.traverse(obj => {
-            if (obj.isMesh) obj.material.map = tex;
-        })
-    });
-}
-
-
-let head, skin;
-const loader = new GLTFLoader();
-loader.load(config.skinLocation || "./skin.glb", gltf => {
-    skin = gltf.scene;
-
-    skin.traverse(obj => {
-        obj.castShadow = true;
-        if (obj.name === "head") head = obj;
-    })
-    skin.position.y = -.5
-
-    scene.add(skin);
-
-    // Event listners
-    document.getElementById("userImage").addEventListener("change", ev => {
-        const image = ev.target.files[0];
-        const url = URL.createObjectURL(image);
-        updateSkinMap(url);
-    });
-
-    window.addEventListener("mousemove", ev => {
-        // Angle of the camera
-        const angle = Math.abs(controls.getAzimuthalAngle());
-        if (angle > (config.joinLimit || 0.8)) return
-
-        const pos = getCursorPosition(ev);
-        rotJoint(pos)
+        // Display
         renderer.render(scene, camera);
-    });
+        spinner.remove();
 
-    if (config.testSkin || false) updateSkinMap(config.testSkinURL)
+        // Event listners
+        document.getElementById("userImage").addEventListener("change", ev => {
+            const image = ev.target.files[0];
+            const url = URL.createObjectURL(image);
+            updateTexture(skin, url);
+        });
 
-    // Disable loader
-    spinner.remove();
-    animate();
-}, undefined, (error) => console.log(error));
+        window.addEventListener("resize", () => {
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.render(scene, camera);
+        });
 
-// Ground
-const planeGeometry = new THREE.PlaneGeometry(1000, 1000, 1000);
-const planeMaterial = new THREE.MeshPhongMaterial({ color: config.groundColor || 0xE5EAEF });
-const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-plane.rotation.x = - Math.PI / 2;
-plane.position.y = -1.5;
-plane.receiveShadow = true;
-scene.add(plane);
+        window.addEventListener("mousemove", ev => {
+            // Angle of the camera
+            const angle = Math.abs(orbit.getAzimuthalAngle());
+            if (angle > (config.joinLimit || 0.8)) return
 
-// Fellow cursor  stuff
-const getCursorPosition = ev => ({
-    x: (ev.clientX / window.innerWidth) * 2 - 1,
-    y: - (ev.clientY / window.innerHeight) * 2 + 1
-});
+            const pos = getCursorPosition(ev);
+            rotJoint(head, pos)
+            renderer.render(scene, camera);
+        });
 
-const rotJoint = pos => {
-    // Left Right
-    head.rotation.y = limitWithinRange((Math.PI * 2) + (Math.PI / 2 * -pos.x), 6, 6.5) + Math.PI * 2;
+        if (config.testSkin) updateTexture(skin, config.testSkinURL)
 
-    // Top Bottom
-    head.rotation.x = limitWithinRange((Math.PI * 2) - (Math.PI / 2 * pos.y), 6.1, 6.4) + Math.PI;
-};
+        // Animation
+        animate();
+    } catch (err) {
+        console.log(err);
+    }
+}
 
-const limitWithinRange = (num, min, max) => Math.min(Math.max(num, min), max);
-
-// Resizing
-window.addEventListener("resize", () => {
-    camera.aspect = canvas.clientWidth / canvas.clientHeight;
-    camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
-});
 
 // Display
-let isOrbitControlsActivited = false;
+const orbit = new OrbitControls(camera, canvas);
+let isOrbitControlsActivited = false, k = .05;
+orbit.enabled = false;
+// Start animation
 const animate = () => {
-    if (!isOrbitControlsActivited) zoomInInitally();
-
+    if (!isOrbitControlsActivited) {
+        if (camera.position.z > 4) {
+            camera.position.z -= k;
+            k += 0.01;
+        } else {
+            orbit.enabled = true;
+            isOrbitControlsActivited = true;
+        }
+    }
 
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
@@ -165,18 +90,4 @@ const animate = () => {
     renderer.render(scene, camera);
 };
 
-
-// Start animation
-let k = .05;
-function zoomInInitally() {
-    if (!isOrbitControlsActivited && camera.position.z > 4 || spotLight.position.z > 4) {
-        camera.position.z -= k;
-        spotLight.position.z -= k;
-        k += 0.01;
-    } else {
-        isOrbitControlsActivited = true;
-        controls.enableZoom = false;
-        controls.ena = false;
-        controls.update();
-    }
-}
+main();
