@@ -31,10 +31,6 @@ lightGrup.add(hemLight);
 
 // Spot Light
 export const spotLight = new THREE.SpotLight(0xffffff, config.spotLightStrength || 0.6);
-spotLight.position.set(0, 0, 30);
+spotLight.position.z = 16;
 lightGrup.add(spotLight);
-const spotLight2 = spotLight.clone();
-
-spotLight2.position.set(0, 0, -30);
-lightGrup.add(spotLight2);
 export default lightGrup;

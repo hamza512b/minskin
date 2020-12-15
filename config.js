@@ -11,5 +11,5 @@ export default {
     ambientLightStrength: 3,
     dirLightStrength: 0.5,
     hemLightStrength: .2,
-    spotLightStrength: .2
+    spotLightStrength: 1
 }
