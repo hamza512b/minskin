@@ -1,3 +1,11 @@
+// Webpack
+import javaUrl from "./assets/geometry/java.gltf";
+import pocketUrl from "./assets/geometry/pocket.gltf";
+import steveText from "./assets/textures/steve.png";
+import testText from "./assets/textures/test.png";
+
+
+// Threejs
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 // Style
@@ -19,27 +27,27 @@ import config from '../config';
 // Nodes
 const spinner = document.querySelector("div.spinner");
 const canvas = document.querySelector("canvas");
+const toggleBtn = document.getElementById("changeEdtion");
 
 // Main 
 async function main() {
     try {
-        const { skin, head } = (await loadSkin("/skin.glb"));
+        const java = (await loadSkin(javaUrl));
+        const pocket = (await loadSkin(pocketUrl));
+        let isJava = config.isJava;
 
         // Add Stuff
         scene.add(light);
         scene.add(ground);
-        scene.add(skin);
-
-        // Display
-        renderer.render(scene, camera);
-        spinner.remove();
+        scene.add(isJava ? java.skin : pocket.skin);
 
         // Event listners
+        let url;
         document.getElementById("userImage").addEventListener("change", ev => {
             const image = ev.target.files[0];
-            const url = URL.createObjectURL(image);
-            updateTexture(skin, url);
-        });
+            url = URL.createObjectURL(image);
+            updateTexture(isJava ? java.skin : pocket.skin, url);
+        });     
 
         window.addEventListener("resize", () => {
             camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -53,10 +61,29 @@ async function main() {
             if (angle > (config.joinLimit || 0.8)) return
 
             const pos = getCursorPosition(ev);
-            rotJoint(head, pos)
+            rotJoint(isJava ? java.head : pocket.head, pos)
             renderer.render(scene, camera);
         });
 
+        toggleBtn.textContent = isJava ? "Java Edtion" : "Pocket Edtion";
+        toggleBtn.addEventListener("click", () => {
+            if (isJava) {
+                scene.remove(java.skin);
+                scene.add(pocket.skin);
+                updateTexture(pocket.skin, url);
+            }
+            else {
+                scene.remove(pocket.skin);
+                scene.add(java.skin);
+                updateTexture(java.skin, url);
+            }
+            isJava = !isJava;
+            toggleBtn.textContent = isJava ? "Java Edtion" : "Pocket Edtion";
+        });
+
+        // Display
+        renderer.render(scene, camera);
+        spinner.remove();
         if (config.testSkin) updateTexture(skin, config.testSkinURL)
 
         // Animation

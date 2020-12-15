@@ -1,4 +1,5 @@
 export default {
+    isJava: true,
     allowLightHellpers: false,
     testSkin: false,
     testSkinURL: "./test.png",
@@ -11,5 +12,5 @@ export default {
     ambientLightStrength: 3,
     dirLightStrength: 0.5,
     hemLightStrength: .2,
-    spotLightStrength: 1
+    spotLightStrength: .8
 }

@@ -48,6 +48,15 @@ module.exports = env => {
                         'css-loader',
                         'sass-loader'
                     ],
+                },
+                // Files
+                {
+                    exclude: /node_modules/,
+                    test: /\.(png|jpe?g|gltf)$/i,
+                    loader: 'file-loader',
+                    options: {
+                        name: "[name].[ext]"
+                    }
                 }
             ],
         },

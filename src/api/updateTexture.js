@@ -7,6 +7,7 @@ export default (skin, url) => {
         tex.magFilter = THREE.NearestFilter;
         tex.minFilter = THREE.LinearMipMapLinearFilter;
         tex.flipY = false;
+        tex.encoding = THREE.sRGBEncoding;
 
         if (tex.image.width === 64 && tex.image.height === 64) {
             skin.traverse(obj => {
