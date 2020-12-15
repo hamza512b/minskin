@@ -10,6 +10,10 @@ const loadSkin = (url) => {
       skin.traverse(obj => {
         obj.castShadow = true;
         if (obj.name === "head") return head = obj;
+        if (obj.isMesh) {
+          obj.material.transparent = true;
+          obj.material.alphaTest = 0.5;
+        }
     });
       resolve({ skin, head })
     }, null, reject);
