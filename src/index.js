@@ -9,7 +9,7 @@ import testText from "./assets/textures/test.png";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 // Style
-import "./style.scss"
+import "./assets/style/style.scss"
 
 // Main
 import scene from "./main/scene";
@@ -27,7 +27,6 @@ import config from '../config';
 // Nodes
 const spinner = document.querySelector("div.spinner");
 const canvas = document.querySelector("canvas");
-const toggleBtn = document.getElementById("changeEdtion");
 
 // Main 
 async function main() {
@@ -46,7 +45,8 @@ async function main() {
         document.getElementById("userImage").addEventListener("change", ev => {
             const image = ev.target.files[0];
             url = URL.createObjectURL(image);
-            updateTexture(isJava ? java.skin : pocket.skin, url);
+            updateTexture(java.skin, url, image.name);
+            updateTexture(pocket.skin, url, image.name);
         });     
 
         window.addEventListener("resize", () => {
@@ -65,26 +65,24 @@ async function main() {
             renderer.render(scene, camera);
         });
 
-        toggleBtn.textContent = isJava ? "Java Edtion" : "Pocket Edtion";
-        toggleBtn.addEventListener("click", () => {
+        const toggleBtn = document.getElementById('changeEdtion');
+        toggleBtn.checked = isJava;
+        toggleBtn.addEventListener("change", () => {
             if (isJava) {
                 scene.remove(java.skin);
                 scene.add(pocket.skin);
-                updateTexture(pocket.skin, url);
             }
             else {
                 scene.remove(pocket.skin);
                 scene.add(java.skin);
-                updateTexture(java.skin, url);
             }
             isJava = !isJava;
-            toggleBtn.textContent = isJava ? "Java Edtion" : "Pocket Edtion";
+            toggleBtn.checked = isJava;
         });
 
         // Display
         renderer.render(scene, camera);
         spinner.remove();
-        if (config.testSkin) updateTexture(skin, config.testSkinURL)
 
         // Animation
         animate();

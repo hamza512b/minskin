@@ -1,8 +1,7 @@
 export default {
     isJava: true,
     allowLightHellpers: false,
-    testSkin: false,
-    testSkinURL: "./test.png",
+    skinURL: "test.png",
     joinLimit: 0.8,
     FOV: 60,
     backgroundColor: 0xF2F2F2,
