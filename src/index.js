@@ -1,8 +1,8 @@
 // Webpack
 import javaUrl from "./assets/geometry/java.gltf";
 import pocketUrl from "./assets/geometry/pocket.gltf";
-import steveText from "./assets/textures/steve.png";
-import testText from "./assets/textures/test.png";
+import "./assets/textures/steve.png";
+import "./assets/textures/test.png";
 
 
 // Threejs
