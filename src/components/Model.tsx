@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { TextureLoader } from 'three'
 import { useFrame, useLoader } from '@react-three/fiber'
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
+import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader'
 import { rotJoint } from '../utils/rotJoint'
 import { useAtom } from 'jotai'
 import { fileUrlAtom } from '../utils/atoms'
@@ -108,4 +108,5 @@ export function Model(props: JSX.IntrinsicElements['group'] & { isPocket: boolea
   )
 }
 
-useGLTF.preload('/java.glb')
+useGLTF.preload(`${basepath}/java.glb`)
+useGLTF.preload(`${basepath}/pocket.glb`)
