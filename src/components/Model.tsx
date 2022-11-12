@@ -8,6 +8,7 @@ import { rotJoint } from '../utils/rotJoint'
 import { useAtom } from 'jotai'
 import { fileUrlAtom } from '../utils/atoms'
 import customToast from '../utils/toast'
+import { basepath } from '../utils/basepath'
 
 type JavaGLTFResult = GLTF & {
   nodes: {
@@ -48,10 +49,9 @@ type PocketGLTFResult = GLTF & {
     ['Material.001']: THREE.MeshStandardMaterial
   }
 }
-
 export function Model(props: JSX.IntrinsicElements['group'] & { isPocket: boolean }) {
-  const { nodes: javaNodes, materials: javaMaterials } = useGLTF('/java.glb') as JavaGLTFResult
-  const { nodes: pocketNodes, materials: pocketMaterials } = useGLTF('/pocket.glb') as PocketGLTFResult
+  const { nodes: javaNodes, materials: javaMaterials } = useGLTF(`${basepath}/java.glb`) as JavaGLTFResult
+  const { nodes: pocketNodes, materials: pocketMaterials } = useGLTF(`${basepath}/pocket.glb`) as PocketGLTFResult
   const ref = useRef<THREE.Mesh>()
   const [fileUrl] = useAtom(fileUrlAtom)
   useFrame(({ mouse }) => {
@@ -60,7 +60,7 @@ export function Model(props: JSX.IntrinsicElements['group'] & { isPocket: boolea
   const colorMap = useLoader(TextureLoader, fileUrl)
   useEffect(() => {
     if (colorMap.source.data.height !== 64 || colorMap.source.data.width !== 64) return customToast("Image size is not 64x64.")
-    
+
     colorMap.flipY = false;
     colorMap.magFilter = THREE.NearestFilter;
     colorMap.minFilter = THREE.LinearMipMapLinearFilter;

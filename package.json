@@ -7,7 +7,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-    "deploy": "pnpm build && pnpm next export && gh-pages -d out"
+    "deploy": "next build && next export && touch ./out/.nojekyll && echo 'hamza.se' > ./out/CNAME && gh-pages -d out -t true"
   },
   "dependencies": {
     "@radix-ui/react-switch": "^1.0.1",
