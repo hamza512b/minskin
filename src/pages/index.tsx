@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import React from 'react'
 import { Toaster } from 'react-hot-toast';
 import FileUploadButton from '../components/FileUploadButton';
@@ -7,6 +8,10 @@ import VersionSwitch from '../components/VersionSwitch';
 const Home = () => {
   return (
     <>
+      <Head>
+        <title>MinSkin - Minecraft Skin Tester</title>
+        <meta name="description" content="Minskin is website for testing minecraft skins. Minskin is created by Hamza512b" />
+      </Head>
       <Toaster
         position="bottom-right"
         reverseOrder={false}
