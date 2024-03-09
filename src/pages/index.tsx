@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import FileUploadButton from '../components/FileUploadButton';
 import ThreeScene from '../components/ThreeScene';
 import VersionSwitch from '../components/VersionSwitch';
+import Credit from '../components/Credt';
 
 const Home = () => {
   return (
@@ -16,8 +17,9 @@ const Home = () => {
         position="bottom-right"
         reverseOrder={false}
       />
-      <div className='h-screen w-screen'>
+      <div className='h-screen w-screen relative'>
         <ThreeScene />
+        <Credit />
       </div>
       <div className='flex justify-between items-center  w-full fixed top-0 right-0 p-4'>
         <FileUploadButton />
